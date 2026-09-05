@@ -1,10 +1,9 @@
 # Codex + LiteLLM Stack
 
-**Point Codex at your own gateway instead of at OpenAI.**
-[LiteLLM](https://github.com/BerriAI/litellm) is the gateway,
-[Codex](https://github.com/openai/codex) is the client. One OpenAI key lives on
-the gateway, every request is logged there, and each person gets a key you can
-budget and revoke.
+Route the Codex CLI through your own [LiteLLM](https://github.com/BerriAI/litellm)
+gateway instead of letting [Codex](https://github.com/openai/codex) call OpenAI
+directly. One OpenAI key lives on the gateway, every request is logged there,
+and each person gets a key you can budget and revoke.
 
 You need Docker running, an OpenAI API key, and the Codex CLI
 (`npm i -g @openai/codex`). Setup takes one command.
@@ -25,9 +24,8 @@ there is nothing to do first:
 > changed.
 
 Codex reads `AGENTS.md` natively and discovers skills under `~/.codex/skills`,
-so the three in `.codex/skills/` work where they sit or copied there. They carry
-the procedures, including the failure modes, so the agent follows a written
-method instead of improvising over your dotfiles.
+so the three in `.codex/skills/` work where they sit or copied there. Each one
+covers a single task, failure modes included.
 
 | Skill | What it covers |
 |---|---|
@@ -41,8 +39,8 @@ is about to overwrite is one you want to keep.
 
 ## Manual setup
 
-Six steps, no agent. Everything stays inside the repo except
-`~/.codex/config.toml` and, on macOS, one LaunchAgent.
+Everything stays inside the repo except `~/.codex/config.toml` and, on macOS,
+one LaunchAgent.
 
 **1. Clone the repo.** Every command below runs from that directory.
 
@@ -113,7 +111,7 @@ admin does this once on the gateway host and issues a virtual key per person
 from the UI, so per-user spend, rate limits, and offboarding all live on the
 gateway.
 
-## What it actually changes
+## What changes
 
 Only where requests go. Your `~/.codex/config.toml` ends up as:
 
@@ -139,15 +137,11 @@ codex -m gpt-6-astra      # anything else
 codex --profile deep      # a saved model + reasoning-effort pair
 ```
 
-Being on the gateway gets you one place holding the OpenAI key, a log of every
-request, per-user keys you can budget and revoke, and one file that controls
-which models people can reach.
-
 ## The desktop app
 
 `codex app` and the Codex icon in your Dock read the same
 `~/.codex/config.toml`, so they hit the gateway too. The key is the part that
-needs help. Finder, the Dock and Spotlight hand an app the environment of your
+doesn't carry over. Finder, the Dock and Spotlight hand an app the environment of your
 GUI login session, never a shell's, so anything a `.zshrc` or
 `dist/start-codex.sh` exports is invisible to the app.
 
@@ -169,16 +163,16 @@ from the LiteLLM UI, not the OpenAI key. A running app won't see a key that
 arrived after it started, so quit and reopen Codex after the first setup or
 after re-running it.
 
-## Proving it works
+## Verifying the path
 
-`doctor.sh` answers the question you can't answer from inside Codex: whether the
-turn you just ran went through your gateway.
+`doctor.sh` checks whether the turn you just ran went through your gateway,
+which Codex itself won't tell you.
 
 ```bash
 ./scripts/doctor.sh
 ```
 
-It walks the real path Codex uses, and each failure names its own fix:
+It walks the path Codex uses, and each failure names its own fix:
 
 ```
 ==> 1/5  Gateway reachable      ✓ http://localhost:4000 responds

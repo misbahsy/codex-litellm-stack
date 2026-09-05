@@ -5,20 +5,21 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;700&display=swap">
 
 <style>
-/* Two brands meet here, so the page uses both. Structure, ink and the grey
-   ground come from litellm.ai; every terminal block is Codex black. The accent
-   is LiteLLM's purple, in the shade that survives whichever ground it lands on.
-   Geist and Geist Mono are the faces litellm.ai ships. */
+/* Colours are sampled from litellm.ai: ground #F6F6F6, ink #272B37, the
+   #5B3FD1 accent and the #F4F3FB surface tint it fills, in Geist and Geist
+   Mono. Green marks come from the LiteLLM docs teal. Every terminal well is
+   Codex black. The accent carries rules, marks and links only; nothing large
+   is painted with it. */
 
 :root {
-  --ground:   #F3F3F3;
+  --ground:   #F6F6F6;
   --panel:    #FFFFFF;
   --ink:      #272B37;
   --muted:    #6B7180;
   --rule:     #E2E1E8;
   --accent:   #5B3FD1;
-  --accent-soft: #E6E6FF;
-  --ok:       #16A34A;
+  --accent-soft: #F4F3FB;
+  --ok:       #0F8B72;
   --bad:      #C0392B;
   --well:     #0D0D0D;
 
@@ -45,9 +46,9 @@
     --ink:      #DCDCDC;
     --muted:    #8F8F8F;
     --rule:     #2B2B2B;
-    --accent:   #B8A8FF;
-    --accent-soft: #241E42;
-    --ok:       #8FE6B0;
+    --accent:   #8B6DF0;
+    --accent-soft: #1D1C26;
+    --ok:       #25C2A0;
     --bad:      #E88872;
     --well:     #000000;
   }
@@ -59,9 +60,9 @@
   --ink:      #DCDCDC;
   --muted:    #8F8F8F;
   --rule:     #2B2B2B;
-  --accent:   #B8A8FF;
-  --accent-soft: #241E42;
-  --ok:       #8FE6B0;
+  --accent:   #8B6DF0;
+  --accent-soft: #1D1C26;
+  --ok:       #25C2A0;
   --bad:      #E88872;
   --well:     #000000;
 }
@@ -108,14 +109,13 @@ body {
 h1 {
   font-family: var(--display);
   font-weight: 700;
-  font-size: clamp(38px, 6.4vw, 66px);
-  line-height: 1.04;
-  letter-spacing: -0.036em;
+  font-size: clamp(29px, 4.2vw, 44px);
+  line-height: 1.12;
+  letter-spacing: -0.028em;
   text-wrap: balance;
   margin: 0;
-  max-width: 15ch;
+  max-width: 26ch;
 }
-h1 em { font-style: normal; color: var(--accent); }
 
 .standfirst {
   font-size: clamp(17px, 2.2vw, 20px);
@@ -469,7 +469,7 @@ footer {
   flex-wrap: wrap;
   gap: 10px 26px;
 }
-footer a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+footer a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--rule); }
 footer a:hover { border-bottom-color: var(--accent); }
 a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
@@ -491,12 +491,11 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
     <div class="wordmark">
       <span>Codex CLI</span><span class="arrow">&#8594;</span><b>LiteLLM</b><span class="arrow">&#8594;</span><span>OpenAI</span>
     </div>
-    <h1>One config file, <em>shipped once</em>, for every engineer.</h1>
+    <h1>Codex CLI through a self-hosted LiteLLM gateway</h1>
     <p class="standfirst">
-      A self-hosted gateway for the Codex CLI. Docker Compose brings up LiteLLM,
-      setup mints a virtual key, rewrites <code>~/.codex/config.toml</code> to point at
-      it, and ends by sending a real request through the whole path. Hand the repo to
-      your coding agent, or run the one script yourself.
+      Docker Compose brings up LiteLLM and Postgres. <code>scripts/setup.sh</code> mints
+      a virtual key, rewrites <code>~/.codex/config.toml</code> to point at the gateway,
+      and sends a request through the whole path before it exits.
     </p>
     <div class="install"><span class="p">$</span> git clone https://github.com/misbahsy/codex-litellm-stack
 <span class="p">$</span> cd codex-litellm-stack
@@ -560,20 +559,19 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
   <section class="sec">
     <div class="rail">[setup]<span>start<br>here</span></div>
     <div class="body">
-      <h2>Set it up</h2>
+      <h2>Setup</h2>
 
       <div class="tabs" role="tablist" aria-label="Setup method">
-        <button class="tab" type="button" role="tab" id="tab-agent" aria-controls="pane-agent" aria-selected="true">With a coding agent</button>
+        <button class="tab" type="button" role="tab" id="tab-agent" aria-controls="pane-agent" aria-selected="true">Coding agent</button>
         <button class="tab" type="button" role="tab" id="tab-manual" aria-controls="pane-manual" aria-selected="false" tabindex="-1">Manual</button>
       </div>
 
       <div class="pane" id="pane-agent" role="tabpanel" aria-labelledby="tab-agent">
         <p>
-          An agent can look at the machine before it changes anything: whether Docker is
+          An agent checks the machine before it changes anything: whether Docker is
           running, what already owns port 4000, whether the
           <code>~/.codex/config.toml</code> it is about to overwrite is one you want to
-          keep. Paste this into Codex from an empty directory and it takes the repo from
-          there.
+          keep. Paste this into Codex from an empty directory.
         </p>
         <div class="well">
           <div class="cap">
@@ -594,8 +592,7 @@ tell me exactly which files outside the repo you changed.</pre>
         <p>
           Codex reads <code>AGENTS.md</code> natively, and it discovers skills under
           <code>~/.codex/skills</code>, so the three in <code>.codex/skills/</code> work
-          where they sit or copied there. They carry the actual procedures, so the agent
-          follows a written method instead of improvising over your dotfiles:
+          where they sit or copied there. Each one covers a single task:
         </p>
         <div class="tablewrap">
           <table>
@@ -609,16 +606,12 @@ tell me exactly which files outside the repo you changed.</pre>
             </tbody>
           </table>
         </div>
-        <p>
-          The skills orchestrate the scripts rather than replacing them, so the manual
-          tab is the same sequence with you at the keyboard.
-        </p>
       </div>
 
       <div class="pane" id="pane-manual" role="tabpanel" aria-labelledby="tab-manual" hidden>
         <p>
-          Six steps, no agent. Everything stays inside the repo except
-          <code>~/.codex/config.toml</code> and, on macOS, one LaunchAgent.
+          Everything stays inside the repo except <code>~/.codex/config.toml</code> and,
+          on macOS, one LaunchAgent.
         </p>
         <ol class="steps">
           <li>
@@ -696,7 +689,7 @@ tell me exactly which files outside the repo you changed.</pre>
   <section class="sec">
     <div class="rail">[keys]<span>three keys,<br>three jobs</span></div>
     <div class="body">
-      <h2>One OpenAI key in, one key per person out</h2>
+      <h2>Which key goes where</h2>
       <p>
         Your OpenAI key is written once, into <code>docker-compose/litellm.env</code> on the
         machine running the gateway. Nothing else on the network sees it. Setup then uses the
@@ -741,7 +734,8 @@ tell me exactly which files outside the repo you changed.</pre>
           </svg>
         </div>
         <figcaption>
-          One upstream key in, one revocable key per person out.
+          The OpenAI key stays at the gateway. Each person gets a virtual key that can be
+          revoked on its own.
         </figcaption>
       </figure>
       <div class="tablewrap">
@@ -757,8 +751,8 @@ tell me exactly which files outside the repo you changed.</pre>
         </table>
       </div>
       <p>
-        Working solo, you will use one virtual key and never think about it again. On a team,
-        one key per person is what makes the spend view and the revoke button mean anything.
+        Solo, that is one virtual key you set once. On a team, one key per person is what
+        makes the spend view and the revoke button useful.
       </p>
     </div>
   </section>
@@ -766,15 +760,14 @@ tell me exactly which files outside the repo you changed.</pre>
   <section class="sec">
     <div class="rail">[models]<span>docker-compose/<br>litellm-config.yaml</span></div>
     <div class="body">
-      <h2>Real model names, straight through</h2>
+      <h2>Model names pass through unchanged</h2>
       <p>
-        The only thing that changes is where requests go. There&rsquo;s no alias layer to
-        learn and nothing gets renamed. A model id you would send to OpenAI works
-        unchanged through the gateway, so people keep picking models the way they
-        already do.
+        The only thing that changes is where requests go. There is no alias layer and
+        nothing is renamed: a model id you would send to OpenAI works unchanged through
+        the gateway.
       </p>
       <div class="well">
-        <div class="cap">how you choose, unchanged</div>
+        <div class="cap">choosing a model</div>
 <pre><span class="cm"># whatever `model` is set to in config.toml</span>
 <span class="k">codex</span>
 
@@ -797,11 +790,11 @@ tell me exactly which files outside the repo you changed.</pre>
   <section class="sec">
     <div class="rail">[client]<span>~/.codex/<br>config.toml</span></div>
     <div class="body">
-      <h2>Written for you, with the timeouts a coding agent needs</h2>
+      <h2>The generated client config</h2>
       <p>
-        Codex holds a streaming connection open for the length of a whole turn, so the
-        defaults are wrong for it out of the box. The generated file sets a two-hour idle
-        timeout and speaks the Responses wire protocol, which LiteLLM serves directly.
+        Codex holds a streaming connection open for a whole turn, so the stock timeouts
+        are too short. The generated file sets a two-hour idle timeout and speaks the
+        Responses wire protocol, which LiteLLM serves directly.
       </p>
       <div class="well">
         <div class="cap">~/.codex/config.toml</div>
@@ -832,10 +825,10 @@ tell me exactly which files outside the repo you changed.</pre>
   <section class="sec">
     <div class="rail">[desktop]<span>~/Library/<br>LaunchAgents</span></div>
     <div class="body">
-      <h2>The desktop app, working from the first launch</h2>
+      <h2>The desktop app and the GUI login session</h2>
       <p>
         <code>codex app</code> and the icon in your Dock read the same config file, so
-        they reach the gateway too. The key is the part that needs help. macOS gives an
+        they reach the gateway too. The key is the part that does not carry over. macOS gives an
         app launched from Finder, the Dock or Spotlight the environment of your GUI login
         session, never a shell&rsquo;s, so a key exported in <code>.zshrc</code> or by a
         launcher script is invisible to it.
@@ -921,7 +914,7 @@ tell me exactly which files outside the repo you changed.</pre>
   <section class="sec">
     <div class="rail">[verify]<span>scripts/<br>doctor.sh</span></div>
     <div class="body">
-      <h2>Five checks along the real request path</h2>
+      <h2>Five checks along the request path</h2>
       <p>
         Setup finishes by running the doctor, and you can run it again any time. It sends
         an actual request through <code>/v1/responses</code> and then a second one with
@@ -967,8 +960,7 @@ tell me exactly which files outside the repo you changed.</pre>
           </svg>
         </div>
         <figcaption>
-          Each check sits on the hop it exercises, so a failure names one hop instead of the
-          whole path.
+          Each check sits on the hop it exercises, so a failure points at one hop.
         </figcaption>
       </figure>
       <div class="well">
@@ -985,7 +977,7 @@ tell me exactly which files outside the repo you changed.</pre>
 
 <span class="lbl">desktop</span> GUI session carries the same key                <span class="ok">ok</span></pre>
       </div>
-      <p>When a check fails it names the cause rather than the symptom:</p>
+      <p>A failed check prints the cause:</p>
       <div class="strip">
         <div class="line"><b>4  provider round trip: HTTP 401</b>
 <i>OpenAI rejected the key. Check OPENAI_API_KEY in docker-compose/litellm.env.</i></div>
@@ -998,7 +990,7 @@ tell me exactly which files outside the repo you changed.</pre>
   <section class="sec">
     <div class="rail">[fleet]<span>setup.sh<br>--enterprise</span></div>
     <div class="body">
-      <h2>The same file, pushed to every machine</h2>
+      <h2>Rolling it out with --enterprise</h2>
       <p>
         Run setup with <code>--enterprise</code> and it also writes a secret-free
         <code>dist/config.toml</code>: base URL, wire protocol, timeouts and profiles, with the
@@ -1040,8 +1032,8 @@ tell me exactly which files outside the repo you changed.</pre>
           </svg>
         </div>
         <figcaption>
-          The half you can push to everyone and the half you cannot arrive on separate
-          channels.
+          The config file goes out over MDM; the key is issued per person from the
+          LiteLLM UI.
         </figcaption>
       </figure>
     </div>
@@ -1050,7 +1042,7 @@ tell me exactly which files outside the repo you changed.</pre>
   <section class="sec">
     <div class="rail">[layout]<span>on<br>disk</span></div>
     <div class="body">
-      <h2>What&rsquo;s in the repo</h2>
+      <h2>Repo layout</h2>
 <pre class="tree">AGENTS.md                <span class="c">how the repo works, for the agent</span>
 <span class="d">.codex/skills/</span>
   codex-litellm-setup/       <span class="c">stand it up</span>
