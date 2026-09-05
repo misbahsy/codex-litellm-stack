@@ -384,6 +384,46 @@ td.dim { color: var(--muted); }
 .cmd .c { color: var(--well-key); }
 .cmd .cm { color: var(--well-cm); }
 
+/* ---------- figures ---------- */
+
+.fig { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.fig .figscroll { overflow-x: auto; }
+.fig svg { display: block; width: 100%; height: auto; color: var(--ink); }
+.fig figcaption {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 66ch;
+}
+
+.fig .n      { fill: var(--panel); stroke: var(--rule); stroke-width: 1; }
+.fig .n-acc  { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
+.fig .n-well { fill: var(--well); stroke: var(--well-rule); stroke-width: 1; }
+.fig .n-bad  { fill: none; stroke: var(--bad); stroke-width: 1; stroke-dasharray: 4 3; }
+
+.fig .tt { font-family: var(--display); font-size: 14px; font-weight: 600; letter-spacing: -0.01em; fill: var(--ink); }
+.fig .ti { font-family: var(--mono); font-size: 11.5px; fill: var(--ink); }
+.fig .ts { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+.fig .tn { font-family: var(--mono); font-size: 12px; font-weight: 700; fill: var(--accent); }
+.fig .tw { fill: var(--well-ink); }
+.fig .tk { fill: var(--well-key); }
+.fig .td { fill: var(--well-dim); }
+.fig .ta { fill: var(--accent); }
+.fig .tb { fill: var(--bad); }
+.fig .tok { fill: var(--ok); }
+
+.fig .e      { fill: none; stroke: currentColor; stroke-width: 1.4; opacity: 0.5; }
+.fig .e-thin { fill: none; stroke: currentColor; stroke-width: 1; opacity: 0.3; }
+.fig .e-acc  { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+.fig .e-bad  { fill: none; stroke: var(--bad); stroke-width: 1.4; stroke-dasharray: 5 4; }
+.fig .x      { fill: none; stroke: var(--bad); stroke-width: 1.8; }
+.fig .ah     { fill: currentColor; opacity: 0.5; }
+.fig .ah-acc { fill: var(--accent); }
+.fig .ah-bad { fill: var(--bad); }
+
+.fig.hero { margin-top: 6px; }
+
 /* ---------- failure strip ---------- */
 
 .strip {
@@ -438,6 +478,7 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
 }
 
 @media (max-width: 720px) {
+  .fig svg { min-width: 600px; }
   .sec { grid-template-columns: 1fr; gap: 14px; }
   .sec > .rail { position: static; }
   .page { gap: 48px; padding: 40px 20px 72px; }
@@ -461,6 +502,59 @@ a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outl
 <span class="p">$</span> cd codex-litellm-stack
 <span class="p">$</span> <span class="c">./scripts/setup.sh</span></div>
     <div class="runline">Needs Docker running and an OpenAI API key.</div>
+
+    <figure class="fig hero">
+      <div class="figscroll">
+        <svg viewBox="0 0 940 320" role="img" aria-label="Codex CLI and the Codex desktop app both read ~/.codex/config.toml and send requests carrying a virtual key to the LiteLLM gateway. The gateway holds the OpenAI key, logs every request, issues virtual keys, records them in Postgres, and is the only thing that calls OpenAI.">
+          <defs><marker id="f1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="ah"/></marker></defs>
+
+          <rect class="n" x="8" y="52" width="188" height="56" rx="6"/>
+          <text class="tt" x="26" y="80">Codex CLI</text>
+          <text class="ts" x="26" y="98">codex, codex exec</text>
+
+          <rect class="n" x="8" y="124" width="188" height="56" rx="6"/>
+          <text class="tt" x="26" y="152">Codex desktop app</text>
+          <text class="ts" x="26" y="170">the icon in your Dock</text>
+
+          <rect class="n" x="8" y="212" width="188" height="52" rx="6"/>
+          <text class="ti" x="26" y="234">~/.codex/config.toml</text>
+          <text class="ts" x="26" y="252">base_url &#8594; the gateway</text>
+          <path class="e-thin" d="M102 212 V184"/>
+          <text class="ts" x="112" y="202">read by both</text>
+
+          <path class="e" d="M196 80 H238 V138"/>
+          <path class="e" d="M196 152 H238 V138"/>
+          <path class="e" d="M238 138 H336" marker-end="url(#f1a)"/>
+          <text class="ts" x="288" y="128" text-anchor="middle">/v1/responses</text>
+          <text class="ts" x="288" y="158" text-anchor="middle">+ virtual key</text>
+
+          <rect class="n-acc" x="340" y="40" width="300" height="180" rx="8"/>
+          <text class="tt" x="362" y="76">LiteLLM gateway</text>
+          <text class="ti" x="362" y="110">OPENAI_API_KEY lives here</text>
+          <text class="ti" x="362" y="134">logs every request and its cost</text>
+          <text class="ti" x="362" y="158">issues and revokes virtual keys</text>
+          <text class="ti" x="362" y="182">serves OpenAI&#8217;s model names as-is</text>
+
+          <path class="e-thin" d="M490 220 V250"/>
+          <text class="ts" x="500" y="240">writes</text>
+          <rect class="n" x="390" y="250" width="200" height="52" rx="6"/>
+          <text class="tt" x="408" y="274">Postgres</text>
+          <text class="ts" x="408" y="292">keys, budgets, spend</text>
+
+          <path class="e" d="M640 126 H754" marker-end="url(#f1a)"/>
+          <text class="ts" x="700" y="116" text-anchor="middle">one OpenAI key</text>
+          <text class="ts" x="700" y="146" text-anchor="middle">for everyone</text>
+
+          <rect class="n" x="760" y="98" width="172" height="56" rx="6"/>
+          <text class="tt" x="778" y="126">OpenAI</text>
+          <text class="ts" x="778" y="144">api.openai.com</text>
+        </svg>
+      </div>
+      <figcaption>
+        Both clients read the same config file and send a virtual key to your gateway.
+        The OpenAI key sits in the gateway and goes no further.
+      </figcaption>
+    </figure>
   </header>
 
   <section class="sec">
@@ -600,6 +694,76 @@ tell me exactly which files outside the repo you changed.</pre>
   </section>
 
   <section class="sec">
+    <div class="rail">[keys]<span>three keys,<br>three jobs</span></div>
+    <div class="body">
+      <h2>One OpenAI key in, one key per person out</h2>
+      <p>
+        Your OpenAI key is written once, into <code>docker-compose/litellm.env</code> on the
+        machine running the gateway. Nothing else on the network sees it. Setup then uses the
+        master key to mint a virtual key, and that is the credential Codex sends.
+      </p>
+      <figure class="fig">
+        <div class="figscroll">
+          <svg viewBox="0 0 940 270" role="img" aria-label="The OpenAI key sits in docker-compose/litellm.env and is loaded by the LiteLLM gateway. The master key issues virtual keys through POST /key/generate: one for your laptop, one for a teammate, one for a CI runner that has been revoked on its own without affecting the others.">
+            <defs><marker id="f2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="ah"/></marker><marker id="f2p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="ah-acc"/></marker><marker id="f2b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="ah-bad"/></marker></defs>
+
+            <rect class="n-well" x="8" y="112" width="232" height="64" rx="6"/>
+            <text class="ti tk" x="26" y="140">OPENAI_API_KEY</text>
+            <text class="ts td" x="26" y="160">docker-compose/litellm.env</text>
+
+            <path class="e" d="M240 144 H326" marker-end="url(#f2a)"/>
+            <text class="ts" x="283" y="134" text-anchor="middle">at startup</text>
+
+            <rect class="n-acc" x="330" y="82" width="250" height="128" rx="8"/>
+            <text class="tt" x="350" y="116">LiteLLM gateway</text>
+            <text class="ti" x="350" y="146">master key = admin</text>
+            <text class="ti" x="350" y="170">POST /key/generate</text>
+            <text class="ti" x="350" y="194">the UI at /ui</text>
+
+            <path class="e-acc" d="M580 146 H640"/>
+            <path class="e-acc" d="M640 146 V44 H696" marker-end="url(#f2p)"/>
+            <path class="e-acc" d="M640 146 H696" marker-end="url(#f2p)"/>
+            <path class="e-bad" d="M640 146 V224 H696" marker-end="url(#f2b)"/>
+            <text class="ts ta" x="668" y="138" text-anchor="middle">issues</text>
+            <text class="ts tb" x="668" y="216" text-anchor="middle">revoked</text>
+
+            <rect class="n" x="700" y="18" width="232" height="52" rx="6"/>
+            <text class="ti" x="718" y="42">sk-4f9c&#8230;</text>
+            <text class="ts" x="718" y="60">your laptop</text>
+
+            <rect class="n" x="700" y="120" width="232" height="52" rx="6"/>
+            <text class="ti" x="718" y="144">sk-8b21&#8230;</text>
+            <text class="ts" x="718" y="162">a teammate&#8217;s laptop</text>
+
+            <rect class="n-bad" x="700" y="198" width="232" height="52" rx="6"/>
+            <text class="ti tb" x="718" y="222">sk-0d77&#8230;</text>
+            <text class="ts tb" x="718" y="240">CI runner, revoked on its own</text>
+          </svg>
+        </div>
+        <figcaption>
+          One upstream key in, one revocable key per person out.
+        </figcaption>
+      </figure>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>Key</th><th>Lives in</th><th>What it does</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="key">OPENAI_API_KEY</td><td class="dim">docker-compose/litellm.env, chmod 600</td><td class="dim">pays OpenAI; the gateway is the only thing that reads it</td></tr>
+            <tr><td class="key">LITELLM_MASTER_KEY</td><td class="dim">the same env file</td><td class="dim">admin: signs into /ui, issues and revokes virtual keys</td></tr>
+            <tr><td class="key">virtual key</td><td class="dim">dist/start-codex.sh and the LaunchAgent</td><td class="dim">what Codex sends on every request; budget or revoke it alone</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Working solo, you will use one virtual key and never think about it again. On a team,
+        one key per person is what makes the spend view and the revoke button mean anything.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec">
     <div class="rail">[models]<span>docker-compose/<br>litellm-config.yaml</span></div>
     <div class="body">
       <h2>Real model names, straight through</h2>
@@ -680,6 +844,60 @@ tell me exactly which files outside the repo you changed.</pre>
         Setup installs a LaunchAgent that puts the key into that session at every login,
         so it survives a reboot and there is no per-launch command to remember.
       </p>
+      <figure class="fig">
+        <div class="figscroll">
+          <svg viewBox="0 0 940 348" role="img" aria-label="A key exported in a shell reaches the codex CLI. That shell environment never crosses into the GUI login session, which is what Finder, the Dock and Spotlight hand to Codex.app. The LaunchAgent writes the key into the GUI login session at every login, so the app finds it.">
+            <defs><marker id="f3a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="ah"/></marker><marker id="f3p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="ah-acc"/></marker></defs>
+
+            <rect class="n" x="8" y="40" width="200" height="56" rx="6"/>
+            <text class="tt" x="26" y="66">Terminal (zsh)</text>
+            <text class="ts" x="26" y="86">./dist/start-codex.sh</text>
+            <path class="e" d="M208 68 H296" marker-end="url(#f3a)"/>
+            <text class="ts" x="252" y="58" text-anchor="middle">export</text>
+
+            <rect class="n" x="300" y="40" width="230" height="56" rx="6"/>
+            <text class="tt" x="318" y="66">shell environment</text>
+            <text class="ts" x="318" y="86">LITELLM_API_KEY</text>
+            <path class="e" d="M530 68 H696" marker-end="url(#f3a)"/>
+            <text class="ts" x="613" y="58" text-anchor="middle">inherited</text>
+
+            <rect class="n" x="700" y="40" width="232" height="56" rx="6"/>
+            <text class="tt" x="718" y="66">codex, in that terminal</text>
+            <text class="ts tok" x="718" y="86">finds the key</text>
+
+            <path class="e-bad" d="M415 96 V210"/>
+            <path class="x" d="M406 144 L424 162"/>
+            <path class="x" d="M424 144 L406 162"/>
+            <text class="ts tb" x="434" y="157">never crosses</text>
+
+            <rect class="n" x="8" y="210" width="200" height="56" rx="6"/>
+            <text class="tt" x="26" y="236">Finder, Dock</text>
+            <text class="ts" x="26" y="256">Spotlight too</text>
+            <path class="e" d="M208 238 H296" marker-end="url(#f3a)"/>
+            <text class="ts" x="252" y="228" text-anchor="middle">launches</text>
+
+            <rect class="n" x="300" y="210" width="230" height="56" rx="6"/>
+            <text class="tt" x="318" y="236">GUI login session</text>
+            <text class="ts" x="318" y="256">launchd&#8217;s environment</text>
+            <path class="e" d="M530 238 H696" marker-end="url(#f3a)"/>
+            <text class="ts" x="613" y="228" text-anchor="middle">inherited</text>
+
+            <rect class="n" x="700" y="210" width="232" height="56" rx="6"/>
+            <text class="tt" x="718" y="236">Codex.app</text>
+            <text class="ts tok" x="718" y="256">finds the key</text>
+
+            <path class="e-acc" d="M415 286 V270" marker-end="url(#f3p)"/>
+            <rect class="n-acc" x="300" y="286" width="230" height="50" rx="6"/>
+            <text class="ti" x="318" y="308">LaunchAgent</text>
+            <text class="ts" x="318" y="326">launchctl setenv, at login</text>
+            <text class="ts ta" x="542" y="316">puts the key where the app looks</text>
+          </svg>
+        </div>
+        <figcaption>
+          The LaunchAgent exists because the top row and the bottom row do not share an
+          environment.
+        </figcaption>
+      </figure>
       <div class="well">
         <div class="cap">installed once by scripts/setup.sh</div>
 <pre><span class="cm"># ~/Library/LaunchAgents/com.codex-litellm-stack.env.plist</span>
@@ -710,6 +928,49 @@ tell me exactly which files outside the repo you changed.</pre>
         streaming on, because a gateway that answers a health check can still fail the
         kind of request Codex actually sends.
       </p>
+      <figure class="fig">
+        <div class="figscroll">
+          <svg viewBox="0 0 960 200" role="img" aria-label="The five doctor checks placed on the hop each one exercises: checks 1 gateway reachable and 2 key accepted on the hop from Codex to the gateway, check 3 model published at the gateway itself, and checks 4 provider round trip and 5 streaming on the hop from the gateway to OpenAI.">
+            <defs><marker id="f4a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="ah"/></marker></defs>
+
+            <rect class="n" x="8" y="84" width="150" height="50" rx="6"/>
+            <text class="tt" x="26" y="114">Codex</text>
+
+            <path class="e" d="M158 109 H396" marker-end="url(#f4a)"/>
+            <rect class="n-acc" x="400" y="84" width="220" height="50" rx="6"/>
+            <text class="tt" x="418" y="114">LiteLLM gateway</text>
+            <path class="e" d="M620 109 H796" marker-end="url(#f4a)"/>
+
+            <rect class="n" x="800" y="84" width="152" height="50" rx="6"/>
+            <text class="tt" x="818" y="114">OpenAI</text>
+
+            <path class="e-thin" d="M277 76 V107"/>
+            <rect class="n" x="177" y="14" width="200" height="28" rx="14"/>
+            <text class="tn" x="194" y="33">1</text>
+            <text class="ti" x="212" y="33">gateway reachable</text>
+            <rect class="n" x="177" y="48" width="200" height="28" rx="14"/>
+            <text class="tn" x="194" y="67">2</text>
+            <text class="ti" x="212" y="67">key accepted</text>
+
+            <path class="e-thin" d="M728 76 V107"/>
+            <rect class="n" x="628" y="14" width="200" height="28" rx="14"/>
+            <text class="tn" x="645" y="33">4</text>
+            <text class="ti" x="663" y="33">provider round trip</text>
+            <rect class="n" x="628" y="48" width="200" height="28" rx="14"/>
+            <text class="tn" x="645" y="67">5</text>
+            <text class="ti" x="663" y="67">streaming</text>
+
+            <path class="e-thin" d="M510 134 V158"/>
+            <rect class="n" x="410" y="158" width="200" height="28" rx="14"/>
+            <text class="tn" x="427" y="177">3</text>
+            <text class="ti" x="445" y="177">model published</text>
+          </svg>
+        </div>
+        <figcaption>
+          Each check sits on the hop it exercises, so a failure names one hop instead of the
+          whole path.
+        </figcaption>
+      </figure>
       <div class="well">
         <div class="cap">$ ./scripts/doctor.sh</div>
 <pre><span class="lbl">1</span>  gateway reachable        http://localhost:4000        <span class="ok">ok</span>
@@ -749,6 +1010,40 @@ tell me exactly which files outside the repo you changed.</pre>
         Engineers install Codex, get the config from device management, and the first
         <code>codex</code> they run is already pointed at the gateway.
       </p>
+      <figure class="fig">
+        <div class="figscroll">
+          <svg viewBox="0 0 940 250" role="img" aria-label="Two delivery channels meet on one machine: dist/config.toml carries no secret and goes out over device management, while the LiteLLM UI issues one virtual key per person. Together they give the laptop a ~/.codex/config.toml and a LITELLM_API_KEY, and every request from it goes to the gateway.">
+            <defs><marker id="f5a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="ah"/></marker></defs>
+
+            <rect class="n-well" x="8" y="30" width="280" height="62" rx="6"/>
+            <text class="ti tk" x="26" y="56">dist/config.toml</text>
+            <text class="ts td" x="26" y="76">base_url, wire_api, no secret</text>
+
+            <rect class="n" x="8" y="158" width="280" height="62" rx="6"/>
+            <text class="tt" x="26" y="184">LiteLLM UI at /ui</text>
+            <text class="ts" x="26" y="204">one virtual key per person</text>
+
+            <path class="e" d="M288 61 H420 V112 H552" marker-end="url(#f5a)"/>
+            <text class="ts" x="360" y="51" text-anchor="middle">pushed over MDM, once</text>
+            <path class="e" d="M288 189 H470 V140 H552" marker-end="url(#f5a)"/>
+            <text class="ts" x="379" y="205" text-anchor="middle">issued per person</text>
+
+            <rect class="n-acc" x="556" y="76" width="284" height="100" rx="8"/>
+            <text class="tt" x="576" y="106">an engineer&#8217;s laptop</text>
+            <text class="ti" x="576" y="134">~/.codex/config.toml</text>
+            <text class="ti" x="576" y="158">LITELLM_API_KEY</text>
+
+            <path class="e" d="M698 176 V202" marker-end="url(#f5a)"/>
+            <text class="ts" x="710" y="196">every request</text>
+            <rect class="n" x="598" y="206" width="200" height="40" rx="6"/>
+            <text class="tt" x="616" y="232">the gateway</text>
+          </svg>
+        </div>
+        <figcaption>
+          The half you can push to everyone and the half you cannot arrive on separate
+          channels.
+        </figcaption>
+      </figure>
     </div>
   </section>
 
