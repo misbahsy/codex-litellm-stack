@@ -1,0 +1,48 @@
+# litellm config yml
+#
+# The gateway publishes OpenAI's models under their real names. Codex picks
+# whichever one it wants per profile or with `codex -m <model>`. Nothing here
+# renames anything, so a model id you'd send to OpenAI works unchanged.
+
+model_list:
+  # The catch-all: any OpenAI model, proxied, without editing this file.
+  - model_name: "*"
+    litellm_params:
+      model: openai/*
+      api_key: os.environ/OPENAI_API_KEY
+
+  # Listed explicitly so they show up in /v1/models and can carry their own
+  # limits. Delete any you don't want people reaching, or add per-model
+  # tpm/rpm and budgets here.
+  - model_name: gpt-5.6-terra
+    litellm_params:
+      model: openai/gpt-5.6-terra
+      api_key: os.environ/OPENAI_API_KEY
+  - model_name: gpt-5.6-luna
+    litellm_params:
+      model: openai/gpt-5.6-luna
+      api_key: os.environ/OPENAI_API_KEY
+  - model_name: gpt-5.6-sol
+    litellm_params:
+      model: openai/gpt-5.6-sol
+      api_key: os.environ/OPENAI_API_KEY
+  - model_name: gpt-6-astra
+    litellm_params:
+      model: openai/gpt-6-astra
+      api_key: os.environ/OPENAI_API_KEY
+
+litellm_settings: # module level litellm settings - https://github.com/BerriAI/litellm/blob/main/litellm/__init__.py
+  drop_params: true
+  # OPTIONAL - send every request to Langfuse for tracing. Also set
+  # LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY / LANGFUSE_HOST in litellm.env
+  # success_callback: ["langfuse"]
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  request_timeout: 600 # Codex streams long turns; don't cut them off
+
+router_settings:
+  routing_strategy: simple-shuffle
+  num_retries: 3
+  allowed_fails: 3
+  cooldown_time: 30

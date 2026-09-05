@@ -1,0 +1,841 @@
+<title>Codex + LiteLLM Stack</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;700&display=swap">
+
+<style>
+/* Two brands meet here, so the page uses both. Structure, ink and the grey
+   ground come from litellm.ai; every terminal block is Codex black. The accent
+   is LiteLLM's purple, in the shade that survives whichever ground it lands on.
+   Geist and Geist Mono are the faces litellm.ai ships. */
+
+:root {
+  --ground:   #F3F3F3;
+  --panel:    #FFFFFF;
+  --ink:      #272B37;
+  --muted:    #6B7180;
+  --rule:     #E2E1E8;
+  --accent:   #5B3FD1;
+  --accent-soft: #E6E6FF;
+  --ok:       #16A34A;
+  --bad:      #C0392B;
+  --well:     #0D0D0D;
+
+  --display: "Geist", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --body:    "Geist", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --mono:    "Geist Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+
+  /* Constant across themes: the wells are always the Codex terminal. */
+  --well-ink:  #DCDCDC;
+  --well-dim:  #8F8F8F;
+  --well-cm:   #6E6E6E;
+  --well-rule: #303030;
+  --well-key:  #B8A8FF;
+  --well-str:  #8FE6B0;
+  --well-num:  #57F0F0;
+  --well-ok:   #8FE6B0;
+  --well-bad:  #E88872;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:   #0D0D0D;
+    --panel:    #181818;
+    --ink:      #DCDCDC;
+    --muted:    #8F8F8F;
+    --rule:     #2B2B2B;
+    --accent:   #B8A8FF;
+    --accent-soft: #241E42;
+    --ok:       #8FE6B0;
+    --bad:      #E88872;
+    --well:     #000000;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground:   #0D0D0D;
+  --panel:    #181818;
+  --ink:      #DCDCDC;
+  --muted:    #8F8F8F;
+  --rule:     #2B2B2B;
+  --accent:   #B8A8FF;
+  --accent-soft: #241E42;
+  --ok:       #8FE6B0;
+  --bad:      #E88872;
+  --well:     #000000;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16.5px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 56px 28px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead { display: flex; flex-direction: column; gap: 22px; }
+
+.wordmark {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.wordmark b { color: var(--accent); font-weight: 700; }
+.wordmark .arrow { color: var(--rule); }
+
+h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(38px, 6.4vw, 66px);
+  line-height: 1.04;
+  letter-spacing: -0.036em;
+  text-wrap: balance;
+  margin: 0;
+  max-width: 15ch;
+}
+h1 em { font-style: normal; color: var(--accent); }
+
+.standfirst {
+  font-size: clamp(17px, 2.2vw, 20px);
+  line-height: 1.55;
+  color: var(--muted);
+  max-width: 62ch;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.install {
+  background: var(--well);
+  color: var(--well-ink);
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.85;
+  padding: 20px 22px;
+  border: 1px solid var(--well-rule);
+  border-radius: 6px;
+  overflow-x: auto;
+  white-space: pre;
+  margin-top: 6px;
+}
+.install .p { color: var(--well-cm); user-select: none; }
+.install .c { color: var(--well-key); }
+
+.runline {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+/* ---------- section rail ---------- */
+
+.sec {
+  display: grid;
+  grid-template-columns: 176px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+  border-top: 1px solid var(--rule);
+  padding-top: 30px;
+}
+
+.sec > .rail {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+  position: sticky;
+  top: 24px;
+}
+.rail span { display: block; color: var(--muted); font-weight: 400; margin-top: 6px; line-height: 1.5; }
+
+.sec > .body { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+h2 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(23px, 3vw, 29px);
+  letter-spacing: -0.024em;
+  line-height: 1.2;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.sec p { margin: 0; max-width: 68ch; text-wrap: pretty; }
+.sec p + p { margin-top: -4px; }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* ---------- table ---------- */
+
+.tablewrap { overflow-x: auto; }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 520px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 18px 9px 0;
+  border-bottom: 1px solid var(--rule);
+}
+td {
+  padding: 12px 18px 12px 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: baseline;
+}
+tbody tr:last-child td { border-bottom: 0; }
+td.key { color: var(--accent); font-weight: 500; }
+td.dim { color: var(--muted); }
+
+/* ---------- code well: the Codex terminal, on either theme ---------- */
+
+.well {
+  background: var(--well);
+  color: var(--well-ink);
+  border: 1px solid var(--well-rule);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.well .cap {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--well-dim);
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--well-rule);
+}
+.well pre {
+  margin: 0;
+  padding: 18px 22px 22px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.72;
+}
+.well .k   { color: var(--well-key); }
+.well .s   { color: var(--well-str); }
+.well .n   { color: var(--well-num); }
+.well .cm  { color: var(--well-cm); }
+.well .tbl { color: #FFFFFF; font-weight: 700; }
+.well .ok  { color: var(--well-ok); }
+.well .bad { color: var(--well-bad); }
+.well .lbl { color: var(--well-dim); }
+.well pre.prompt {
+  /* The source keeps its line breaks for the clipboard; on screen it reflows,
+     so the column stays ragged-right instead of breaking mid-thought. */
+  white-space: normal;
+  color: var(--well-ink);
+  font-family: var(--body);
+  font-size: 15.5px;
+  line-height: 1.65;
+  max-width: 58ch;
+}
+.well .cap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.copy {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--well-dim);
+  background: transparent;
+  border: 1px solid var(--well-rule);
+  border-radius: 4px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: color 0.14s ease, border-color 0.14s ease;
+}
+.copy:hover { color: var(--well-key); border-color: var(--well-key); }
+.copy:focus-visible { outline: 2px solid var(--well-key); outline-offset: 2px; }
+.copy[data-state="done"] { color: var(--well-ok); border-color: var(--well-ok); }
+.copy[data-state="fail"] { color: var(--well-bad); border-color: var(--well-bad); }
+.well pre.prompt code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  color: var(--well-key);
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+/* ---------- tabs ---------- */
+
+.tabs {
+  display: flex;
+  gap: 30px;
+  border-bottom: 1px solid var(--rule);
+}
+.tab {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 0 1px 11px;
+  cursor: pointer;
+}
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+.pane { display: flex; flex-direction: column; gap: 20px; }
+.pane[hidden] { display: none; }
+
+/* ---------- numbered steps ---------- */
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: step;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.steps > li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.steps > li::before {
+  content: counter(step) ".";
+  position: absolute;
+  left: 0;
+  top: 3px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+}
+.steps h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 17.5px;
+  letter-spacing: -0.014em;
+  line-height: 1.3;
+  margin: 0;
+}
+.steps p { margin: 0; color: var(--muted); max-width: 64ch; text-wrap: pretty; }
+
+.cmd {
+  background: var(--well);
+  color: var(--well-ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.8;
+  padding: 13px 17px;
+  border: 1px solid var(--well-rule);
+  border-radius: 5px;
+  overflow-x: auto;
+  white-space: pre;
+}
+.cmd .p { color: var(--well-cm); user-select: none; }
+.cmd .c { color: var(--well-key); }
+.cmd .cm { color: var(--well-cm); }
+
+/* ---------- failure strip ---------- */
+
+.strip {
+  border-left: 2px solid var(--bad);
+  padding: 4px 0 4px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.strip .line {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+.strip .line b { color: var(--bad); font-weight: 500; }
+.strip .line i { color: var(--muted); font-style: normal; }
+
+/* ---------- tree ---------- */
+
+.tree {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.9;
+  white-space: pre;
+  overflow-x: auto;
+  color: var(--ink);
+  margin: 0;
+}
+.tree .d { color: var(--accent); }
+.tree .c { color: var(--muted); }
+
+/* ---------- footer ---------- */
+
+footer {
+  border-top: 1px solid var(--rule);
+  padding-top: 24px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 26px;
+}
+footer a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+footer a:hover { border-bottom-color: var(--accent); }
+a:focus-visible, .install:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+@media (max-width: 720px) {
+  .sec { grid-template-columns: 1fr; gap: 14px; }
+  .sec > .rail { position: static; }
+  .page { gap: 48px; padding: 40px 20px 72px; }
+}
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="wordmark">
+      <span>Codex CLI</span><span class="arrow">&#8594;</span><b>LiteLLM</b><span class="arrow">&#8594;</span><span>OpenAI</span>
+    </div>
+    <h1>One config file, <em>shipped once</em>, for every engineer.</h1>
+    <p class="standfirst">
+      A self-hosted gateway for the Codex CLI. Docker Compose brings up LiteLLM,
+      setup mints a virtual key, rewrites <code>~/.codex/config.toml</code> to point at
+      it, and ends by sending a real request through the whole path. Hand the repo to
+      your coding agent, or run the one script yourself.
+    </p>
+    <div class="install"><span class="p">$</span> git clone https://github.com/misbahsy/codex-litellm-stack
+<span class="p">$</span> cd codex-litellm-stack
+<span class="p">$</span> <span class="c">./scripts/setup.sh</span></div>
+    <div class="runline">Needs Docker running and an OpenAI API key.</div>
+  </header>
+
+  <section class="sec">
+    <div class="rail">[setup]<span>start<br>here</span></div>
+    <div class="body">
+      <h2>Set it up</h2>
+
+      <div class="tabs" role="tablist" aria-label="Setup method">
+        <button class="tab" type="button" role="tab" id="tab-agent" aria-controls="pane-agent" aria-selected="true">With a coding agent</button>
+        <button class="tab" type="button" role="tab" id="tab-manual" aria-controls="pane-manual" aria-selected="false" tabindex="-1">Manual</button>
+      </div>
+
+      <div class="pane" id="pane-agent" role="tabpanel" aria-labelledby="tab-agent">
+        <p>
+          An agent can look at the machine before it changes anything: whether Docker is
+          running, what already owns port 4000, whether the
+          <code>~/.codex/config.toml</code> it is about to overwrite is one you want to
+          keep. Paste this into Codex from an empty directory and it takes the repo from
+          there.
+        </p>
+        <div class="well">
+          <div class="cap">
+            <span>paste into Codex</span>
+            <button class="copy" type="button" data-copy="agent-prompt">Copy</button>
+          </div>
+<pre class="prompt" id="agent-prompt">Clone <code>https://github.com/misbahsy/codex-litellm-stack</code>, cd
+into it, and set it up so my Codex CLI goes through the LiteLLM
+gateway instead of calling OpenAI directly. Read <code>AGENTS.md</code> and
+the skills in <code>.codex/skills/</code> first, then follow the
+<code>codex-litellm-setup</code> procedure: check Docker is running and
+port 4000 is free, run <code>./scripts/setup.sh</code> from the repo root,
+and ask me for my OpenAI API key when the script wants it.
+Never invent a key. Finish by running <code>./scripts/doctor.sh</code> and a
+real Codex turn, show me that request in the gateway logs, and
+tell me exactly which files outside the repo you changed.</pre>
+        </div>
+        <p>
+          Codex reads <code>AGENTS.md</code> natively, and it discovers skills under
+          <code>~/.codex/skills</code>, so the three in <code>.codex/skills/</code> work
+          where they sit or copied there. They carry the actual procedures, so the agent
+          follows a written method instead of improvising over your dotfiles:
+        </p>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Skill</th><th>What it covers</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="key">codex-litellm-setup</td><td class="dim">preflight, run setup, verify with a real turn, report what changed outside the repo</td></tr>
+              <tr><td class="key">codex-litellm-troubleshoot</td><td class="dim">read the doctor output, fix failures in dependency order, and the failures the doctor can&rsquo;t see</td></tr>
+              <tr><td class="key">codex-litellm-fleet</td><td class="dim">the MDM artifact, the secret scan it must pass, per-user keys and budgets</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          The skills orchestrate the scripts rather than replacing them, so the manual
+          tab is the same sequence with you at the keyboard.
+        </p>
+      </div>
+
+      <div class="pane" id="pane-manual" role="tabpanel" aria-labelledby="tab-manual" hidden>
+        <p>
+          Six steps, no agent. Everything stays inside the repo except
+          <code>~/.codex/config.toml</code> and, on macOS, one LaunchAgent.
+        </p>
+        <ol class="steps">
+          <li>
+            <h3>Clone the repo</h3>
+<div class="cmd"><span class="p">$</span> git clone https://github.com/misbahsy/codex-litellm-stack
+<span class="p">$</span> cd codex-litellm-stack</div>
+            <p>Every command below runs from that directory.</p>
+          </li>
+          <li>
+            <h3>Start Docker</h3>
+<div class="cmd"><span class="p">$</span> docker info</div>
+            <p>
+              If that prints an error, Docker is installed but not running. Open Docker
+              Desktop and wait for it to finish starting.
+            </p>
+          </li>
+          <li>
+            <h3>Check that port 4000 is free</h3>
+<div class="cmd"><span class="p">$</span> lsof -nP -iTCP:4000 -sTCP:LISTEN</div>
+            <p>
+              No output means nothing holds it. If a tunnel or dev server does, add
+              <code>--port 4010</code> to the next step: whatever is on that port will
+              answer the health check and the checks will pass against the wrong server.
+            </p>
+          </li>
+          <li>
+            <h3>Run setup</h3>
+<div class="cmd"><span class="p">$</span> <span class="c">./scripts/setup.sh</span>
+<span class="cm"># --port 4010   bind somewhere else</span>
+<span class="cm"># --no-desktop  CLI only, skip the LaunchAgent</span>
+<span class="cm"># --enterprise  also write dist/config.toml for MDM</span></div>
+            <p>
+              It asks for your OpenAI API key and saves it to
+              <code>docker-compose/litellm.env</code> at mode 600. Then it starts LiteLLM
+              and Postgres, mints a virtual key against the gateway, writes
+              <code>~/.codex/config.toml</code> after backing up any existing one, and on
+              macOS installs the LaunchAgent that hands the key to the desktop app.
+            </p>
+            <p>
+              Three keys, three jobs. Your OpenAI key stays in the gateway and never
+              leaves the machine running it. The master key setup generates is the admin
+              credential: it logs into the LiteLLM UI and issues keys. The virtual key is
+              the one your Codex client gets, scoped so you can budget or revoke it on
+              its own. Setting this up for yourself, you hold all three. Running it for a
+              team, one admin does this once and issues a virtual key per person from the
+              UI.
+            </p>
+          </li>
+          <li>
+            <h3>Start Codex</h3>
+<div class="cmd"><span class="p">$</span> <span class="c">./dist/start-codex.sh</span>       <span class="cm"># CLI, key already exported</span>
+<span class="p">$</span> codex app                   <span class="cm"># desktop app; quit and reopen it once</span></div>
+            <p>
+              <code>dist/start-codex.sh</code> is generated and holds a live key, so
+              <code>dist/</code> is gitignored. <code>export LITELLM_API_KEY=&hellip; &amp;&amp; codex</code>
+              does the same thing.
+            </p>
+          </li>
+          <li>
+            <h3>Confirm the requests go through the gateway</h3>
+<div class="cmd"><span class="p">$</span> <span class="c">./scripts/doctor.sh</span>
+<span class="p">$</span> codex exec <span class="c">"reply with the word CONNECTED and nothing else"</span>
+<span class="p">$</span> docker compose -f docker-compose/docker-compose.yml logs litellm --tail 20</div>
+            <p>
+              The doctor runs five checks along the request path. The log line from that
+              last command is what tells you Codex went to your gateway rather than
+              straight to OpenAI.
+            </p>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="rail">[models]<span>docker-compose/<br>litellm-config.yaml</span></div>
+    <div class="body">
+      <h2>Real model names, straight through</h2>
+      <p>
+        The only thing that changes is where requests go. There&rsquo;s no alias layer to
+        learn and nothing gets renamed. A model id you would send to OpenAI works
+        unchanged through the gateway, so people keep picking models the way they
+        already do.
+      </p>
+      <div class="well">
+        <div class="cap">how you choose, unchanged</div>
+<pre><span class="cm"># whatever `model` is set to in config.toml</span>
+<span class="k">codex</span>
+
+<span class="cm"># any model the gateway serves, ad hoc</span>
+<span class="k">codex</span> -m gpt-6-astra
+
+<span class="cm"># a saved model + reasoning-effort pair</span>
+<span class="k">codex</span> --profile deep</pre>
+      </div>
+      <p>
+        <code>litellm-config.yaml</code> lists the models you want visible in
+        <code>/v1/models</code>, which is also where per-model rate limits and budgets
+        attach, plus a <code>"*"</code> catch-all so anything else passes through without
+        an edit. Delete that entry and the gateway serves only the list, which is how you
+        restrict a fleet to approved models from one file.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="rail">[client]<span>~/.codex/<br>config.toml</span></div>
+    <div class="body">
+      <h2>Written for you, with the timeouts a coding agent needs</h2>
+      <p>
+        Codex holds a streaming connection open for the length of a whole turn, so the
+        defaults are wrong for it out of the box. The generated file sets a two-hour idle
+        timeout and speaks the Responses wire protocol, which LiteLLM serves directly.
+      </p>
+      <div class="well">
+        <div class="cap">~/.codex/config.toml</div>
+<pre><span class="cm"># generated by scripts/setup.sh; only base_url is really new</span>
+<span class="k">model</span> = <span class="s">"gpt-5.6-terra"</span>
+<span class="k">model_provider</span> = <span class="s">"litellm"</span>
+<span class="k">model_reasoning_effort</span> = <span class="s">"medium"</span>
+
+<span class="tbl">[model_providers.litellm]</span>
+<span class="k">base_url</span> = <span class="s">"http://localhost:4000/v1"</span>
+<span class="k">env_key</span> = <span class="s">"LITELLM_API_KEY"</span>
+<span class="k">wire_api</span> = <span class="s">"responses"</span>
+<span class="k">stream_idle_timeout_ms</span> = <span class="n">7200000</span>   <span class="cm"># two hours; a turn can take that long</span>
+<span class="k">stream_max_retries</span> = <span class="n">5</span>
+
+<span class="tbl">[profiles.astra]</span>
+<span class="k">model</span> = <span class="s">"gpt-6-astra"</span>
+<span class="k">model_reasoning_effort</span> = <span class="s">"high"</span></pre>
+      </div>
+      <p>
+        The key in <code>LITELLM_API_KEY</code> is a virtual key minted at setup. Budget
+        it, rate-limit it, or revoke it from the LiteLLM UI. The gateway master key never
+        reaches a laptop.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="rail">[desktop]<span>~/Library/<br>LaunchAgents</span></div>
+    <div class="body">
+      <h2>The desktop app, working from the first launch</h2>
+      <p>
+        <code>codex app</code> and the icon in your Dock read the same config file, so
+        they reach the gateway too. The key is the part that needs help. macOS gives an
+        app launched from Finder, the Dock or Spotlight the environment of your GUI login
+        session, never a shell&rsquo;s, so a key exported in <code>.zshrc</code> or by a
+        launcher script is invisible to it.
+      </p>
+      <p>
+        Setup installs a LaunchAgent that puts the key into that session at every login,
+        so it survives a reboot and there is no per-launch command to remember.
+      </p>
+      <div class="well">
+        <div class="cap">installed once by scripts/setup.sh</div>
+<pre><span class="cm"># ~/Library/LaunchAgents/com.codex-litellm-stack.env.plist</span>
+<span class="k">launchctl</span> setenv LITELLM_API_KEY <span class="s">sk-&hellip;</span>   <span class="cm"># RunAtLoad, every login</span>
+
+<span class="cm"># confirm the app will find it</span>
+<span class="k">launchctl</span> getenv LITELLM_API_KEY
+
+<span class="cm"># CLI only, if you'd rather not</span>
+<span class="k">./scripts/setup.sh</span> --no-desktop</pre>
+      </div>
+      <p>
+        The plist holds the key at <code>chmod 600</code>, and the login session makes it
+        readable to every process you run, which is a wider reach than the CLI-only path.
+        What sits there is a budgeted virtual key you can revoke from the LiteLLM UI, not
+        the OpenAI key. <code>scripts/uninstall-desktop-env.sh</code> takes it back out.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="rail">[verify]<span>scripts/<br>doctor.sh</span></div>
+    <div class="body">
+      <h2>Five checks along the real request path</h2>
+      <p>
+        Setup finishes by running the doctor, and you can run it again any time. It sends
+        an actual request through <code>/v1/responses</code> and then a second one with
+        streaming on, because a gateway that answers a health check can still fail the
+        kind of request Codex actually sends.
+      </p>
+      <div class="well">
+        <div class="cap">$ ./scripts/doctor.sh</div>
+<pre><span class="lbl">1</span>  gateway reachable        http://localhost:4000        <span class="ok">ok</span>
+<span class="lbl">2</span>  key accepted             /v1/models &#8594; 200             <span class="ok">ok</span>
+<span class="lbl">3</span>  model published          gpt-5.6-terra                 <span class="ok">ok</span>
+<span class="lbl">4</span>  provider round trip      /v1/responses &#8594; PONG         <span class="ok">ok</span>
+<span class="lbl">5</span>  streaming                12 SSE frames                <span class="ok">ok</span>
+
+<span class="lbl">client</span>  base_url matches gateway                       <span class="ok">ok</span>
+        wire_api = "responses"                         <span class="ok">ok</span>
+        LITELLM_API_KEY exported                       <span class="ok">ok</span>
+
+<span class="lbl">desktop</span> GUI session carries the same key                <span class="ok">ok</span></pre>
+      </div>
+      <p>When a check fails it names the cause rather than the symptom:</p>
+      <div class="strip">
+        <div class="line"><b>4  provider round trip: HTTP 401</b>
+<i>OpenAI rejected the key. Check OPENAI_API_KEY in docker-compose/litellm.env.</i></div>
+        <div class="line"><b>1  gateway reachable: wrong server</b>
+<i>Something is listening on :4000, but it is not LiteLLM. Free the port or use --port.</i></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="rail">[fleet]<span>setup.sh<br>--enterprise</span></div>
+    <div class="body">
+      <h2>The same file, pushed to every machine</h2>
+      <p>
+        Run setup with <code>--enterprise</code> and it also writes a secret-free
+        <code>dist/config.toml</code>: base URL, wire protocol, timeouts and profiles, with the
+        credential left as an environment variable for your own secret delivery. The
+        <code>codex-litellm-fleet</code> skill has the grep that proves it carries no secret. That file
+        is what goes out over MDM.
+      </p>
+      <p>
+        Engineers install Codex, get the config from device management, and the first
+        <code>codex</code> they run is already pointed at the gateway.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="rail">[layout]<span>on<br>disk</span></div>
+    <div class="body">
+      <h2>What&rsquo;s in the repo</h2>
+<pre class="tree">AGENTS.md                <span class="c">how the repo works, for the agent</span>
+<span class="d">.codex/skills/</span>
+  codex-litellm-setup/       <span class="c">stand it up</span>
+  codex-litellm-troubleshoot/  <span class="c">when it doesn&rsquo;t work</span>
+  codex-litellm-fleet/       <span class="c">ship it to everyone</span>
+<span class="d">docker-compose/</span>
+  docker-compose.yml     <span class="c">gateway + postgres</span>
+  litellm-config.yaml    <span class="c">which models the gateway serves</span>
+  litellm.env            <span class="c">OPENAI_API_KEY, master key, port</span>
+  codex-config.toml      <span class="c">template for the client config</span>
+<span class="d">scripts/</span>
+  setup.sh               <span class="c">the one command</span>
+  doctor.sh              <span class="c">the five checks</span>
+  lib.sh                 <span class="c">shared helpers</span>
+  uninstall-desktop-env.sh <span class="c">takes the LaunchAgent back out</span></pre>
+      <p>
+        Postgres is included so virtual keys and spend survive a restart. Point
+        <code>DATABASE_URL</code> at your own instance and drop the service if you already run one.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <span>MIT licensed</span>
+    <a href="https://github.com/BerriAI/litellm">LiteLLM</a>
+    <a href="https://github.com/openai/codex">Codex CLI</a>
+  </footer>
+
+</div>
+
+<script>
+document.querySelectorAll('.copy').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var src = document.getElementById(btn.dataset.copy);
+    if (!src) return;
+    var text = src.textContent;
+    var mark = function (state, label) {
+      btn.dataset.state = state;
+      btn.textContent = label;
+      setTimeout(function () { delete btn.dataset.state; btn.textContent = 'Copy'; }, 2000);
+    };
+    var fallback = function () {
+      // Clipboard API is unavailable over http: and inside some sandboxes.
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      var won = false;
+      try { won = document.execCommand('copy'); } catch (e) { won = false; }
+      document.body.removeChild(ta);
+      mark(won ? 'done' : 'fail', won ? 'Copied' : 'Select it');
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { mark('done', 'Copied'); }, fallback);
+    } else {
+      fallback();
+    }
+  });
+});
+
+var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+function select(tab) {
+  tabs.forEach(function (t) {
+    var on = t === tab;
+    t.setAttribute('aria-selected', on ? 'true' : 'false');
+    t.tabIndex = on ? 0 : -1;
+    document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+  });
+}
+tabs.forEach(function (tab, i) {
+  tab.addEventListener('click', function () { select(tab); });
+  tab.addEventListener('keydown', function (e) {
+    var step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    var next = tabs[(i + step + tabs.length) % tabs.length];
+    select(next);
+    next.focus();
+  });
+});
+</script>

@@ -1,0 +1,39 @@
+# ==============================================================================
+# Codex + LiteLLM Stack. Copied to ~/.codex/config.toml by scripts/setup.sh
+# Generated: __GENERATED_AT__
+#
+# This file changes where Codex sends requests. Model names are OpenAI's real
+# ids, so pick any model the gateway serves:
+#
+#   codex                      the model below
+#   codex -m gpt-6-astra       anything else, ad hoc
+#   codex --profile deep       a saved combination
+# ==============================================================================
+
+model = "gpt-5.6-terra"
+model_provider = "litellm"
+model_reasoning_effort = "medium"
+
+[model_providers.litellm]
+name = "LiteLLM Gateway"
+base_url = "__BASE_URL__"
+env_key = "LITELLM_API_KEY"
+wire_api = "responses"
+# Coding turns stream for a long time; don't let the client give up early.
+stream_idle_timeout_ms = 7200000
+stream_max_retries = 5
+request_max_retries = 4
+
+# Profiles are saved model + effort pairs. Edit freely; any model the gateway
+# serves is fair game.
+[profiles.fast]
+model = "gpt-5.6-luna"
+model_reasoning_effort = "low"
+
+[profiles.deep]
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+
+[profiles.astra]
+model = "gpt-6-astra"
+model_reasoning_effort = "high"
